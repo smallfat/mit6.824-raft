@@ -37,17 +37,11 @@ func (log *OpLog) Read() []porcupine.Operation {
 	return ops
 }
 
-// to make sure timestamps use the monotonic clock, instead of computing
-// absolute timestamps with `time.Now().UnixNano()` (which uses the wall
-// clock), we measure time relative to `t0` using `time.Since(t0)`, which uses
-// the monotonic clock
-var t0 = time.Now()
-
 // get/put/putappend that keep counts
 func Get(cfg *config, ck *Clerk, key string, log *OpLog, cli int) string {
-	start := int64(time.Since(t0))
+	start := time.Now().UnixNano()
 	v := ck.Get(key)
-	end := int64(time.Since(t0))
+	end := time.Now().UnixNano()
 	cfg.op()
 	if log != nil {
 		log.Append(porcupine.Operation{
@@ -63,9 +57,9 @@ func Get(cfg *config, ck *Clerk, key string, log *OpLog, cli int) string {
 }
 
 func Put(cfg *config, ck *Clerk, key string, value string, log *OpLog, cli int) {
-	start := int64(time.Since(t0))
+	start := time.Now().UnixNano()
 	ck.Put(key, value)
-	end := int64(time.Since(t0))
+	end := time.Now().UnixNano()
 	cfg.op()
 	if log != nil {
 		log.Append(porcupine.Operation{
@@ -79,9 +73,9 @@ func Put(cfg *config, ck *Clerk, key string, value string, log *OpLog, cli int) 
 }
 
 func Append(cfg *config, ck *Clerk, key string, value string, log *OpLog, cli int) {
-	start := int64(time.Since(t0))
+	start := time.Now().UnixNano()
 	ck.Append(key, value)
-	end := int64(time.Since(t0))
+	end := time.Now().UnixNano()
 	cfg.op()
 	if log != nil {
 		log.Append(porcupine.Operation{

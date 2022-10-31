@@ -3,8 +3,8 @@ package raft
 //
 // Raft tests.
 //
-// we will use the original test_test.go to test your code for grading.
-// so, while you can modify this code to help you debug, please
+// we will use the original test_test.go To test your code for grading.
+// so, while you can modify this code To help you debug, please
 // test with the original before submitting.
 //
 
@@ -15,7 +15,7 @@ import "math/rand"
 import "sync/atomic"
 import "sync"
 
-// The tester generously allows solutions to complete elections in one second
+// The tester generously allows solutions To complete elections in one second
 // (much more than the paper's range of timeouts).
 const RaftElectionTimeout = 1000 * time.Millisecond
 
@@ -29,19 +29,19 @@ func TestInitialElection2A(t *testing.T) {
 	// is a leader elected?
 	cfg.checkOneLeader()
 
-	// sleep a bit to avoid racing with followers learning of the
-	// election, then check that all peers agree on the term.
+	// sleep a bit To avoid racing with followers learning of the
+	// election, then check that all peers agree on the Term.
 	time.Sleep(50 * time.Millisecond)
 	term1 := cfg.checkTerms()
 	if term1 < 1 {
-		t.Fatalf("term is %v, but should be at least 1", term1)
+		t.Fatalf("Term is %v, but should be at least 1", term1)
 	}
 
-	// does the leader+term stay the same if there is no network failure?
+	// does the leader+Term stay the same if there is no network failure?
 	time.Sleep(2 * RaftElectionTimeout)
 	term2 := cfg.checkTerms()
 	if term1 != term2 {
-		fmt.Printf("warning: term changed even though there were no failures")
+		fmt.Printf("warning: Term changed even though there were no failures")
 	}
 
 	// there should still be a leader.
@@ -79,7 +79,7 @@ func TestReElection2A(t *testing.T) {
 	cfg.connect((leader2 + 1) % servers)
 	cfg.checkOneLeader()
 
-	// re-join of last node shouldn't prevent leader from existing.
+	// re-join of last node shouldn't prevent leader From existing.
 	cfg.connect(leader2)
 	cfg.checkOneLeader()
 
@@ -144,7 +144,7 @@ func TestBasicAgree2B(t *testing.T) {
 
 //
 // check, based on counting bytes of RPCs, that
-// each command is sent to each peer just once.
+// each command is sent To each peer just once.
 //
 func TestRPCBytes2B(t *testing.T) {
 	servers := 3
@@ -186,12 +186,12 @@ func TestFailAgree2B(t *testing.T) {
 
 	cfg.one(101, servers, false)
 
-	// disconnect one follower from the network.
+	// disconnect one follower From the network.
 	leader := cfg.checkOneLeader()
 	cfg.disconnect((leader + 1) % servers)
 
 	// the leader and remaining follower should be
-	// able to agree despite the disconnected follower.
+	// able To agree despite the disconnected follower.
 	cfg.one(102, servers-1, false)
 	cfg.one(103, servers-1, false)
 	time.Sleep(RaftElectionTimeout)
@@ -202,7 +202,7 @@ func TestFailAgree2B(t *testing.T) {
 	cfg.connect((leader + 1) % servers)
 
 	// the full set of servers should preserve
-	// previous agreements, and be able to agree
+	// previous agreements, and be able To agree
 	// on new commands.
 	cfg.one(106, servers, true)
 	time.Sleep(RaftElectionTimeout)
@@ -246,7 +246,7 @@ func TestFailNoAgree2B(t *testing.T) {
 	cfg.connect((leader + 2) % servers)
 	cfg.connect((leader + 3) % servers)
 
-	// the disconnected majority may have chosen a leader from
+	// the disconnected majority may have chosen a leader From
 	// among their own ranks, forgetting index 2.
 	leader2 := cfg.checkOneLeader()
 	index2, _, ok2 := cfg.rafts[leader2].Start(30)
@@ -273,7 +273,7 @@ func TestConcurrentStarts2B(t *testing.T) {
 loop:
 	for try := 0; try < 5; try++ {
 		if try > 0 {
-			// give solution some time to settle
+			// give solution some time To settle
 			time.Sleep(3 * time.Second)
 		}
 
@@ -307,7 +307,7 @@ loop:
 
 		for j := 0; j < servers; j++ {
 			if t, _ := cfg.rafts[j].GetState(); t != term {
-				// term changed -- can't expect low RPC counts
+				// Term changed -- can't expect low RPC counts
 				continue loop
 			}
 		}
@@ -318,8 +318,8 @@ loop:
 			cmd := cfg.wait(index, servers, term)
 			if ix, ok := cmd.(int); ok {
 				if ix == -1 {
-					// peers have moved on to later terms
-					// so we can't expect all Start()s to
+					// peers have moved on To later terms
+					// so we can't expect all Start()s To
 					// have succeeded
 					failed = true
 					break
@@ -357,7 +357,7 @@ loop:
 	}
 
 	if !success {
-		t.Fatalf("term changed too often")
+		t.Fatalf("Term changed too often")
 	}
 
 	cfg.end()
@@ -376,7 +376,7 @@ func TestRejoin2B(t *testing.T) {
 	leader1 := cfg.checkOneLeader()
 	cfg.disconnect(leader1)
 
-	// make old leader try to agree on some entries
+	// make old leader try To agree on some entries
 	cfg.rafts[leader1].Start(102)
 	cfg.rafts[leader1].Start(103)
 	cfg.rafts[leader1].Start(104)
@@ -426,12 +426,12 @@ func TestBackup2B(t *testing.T) {
 	cfg.disconnect((leader1 + 0) % servers)
 	cfg.disconnect((leader1 + 1) % servers)
 
-	// allow other partition to recover
+	// allow other partition To recover
 	cfg.connect((leader1 + 2) % servers)
 	cfg.connect((leader1 + 3) % servers)
 	cfg.connect((leader1 + 4) % servers)
 
-	// lots of successful commands to new group.
+	// lots of successful commands To new group.
 	for i := 0; i < 50; i++ {
 		cfg.one(rand.Int(), 3, true)
 	}
@@ -451,7 +451,7 @@ func TestBackup2B(t *testing.T) {
 
 	time.Sleep(RaftElectionTimeout / 2)
 
-	// bring original leader back to life,
+	// bring original leader back To life,
 	for i := 0; i < servers; i++ {
 		cfg.disconnect(i)
 	}
@@ -459,7 +459,7 @@ func TestBackup2B(t *testing.T) {
 	cfg.connect((leader1 + 1) % servers)
 	cfg.connect(other)
 
-	// lots of successful commands to new group.
+	// lots of successful commands To new group.
 	for i := 0; i < 50; i++ {
 		cfg.one(rand.Int(), 3, true)
 	}
@@ -492,7 +492,7 @@ func TestCount2B(t *testing.T) {
 	total1 := rpcs()
 
 	if total1 > 30 || total1 < 1 {
-		t.Fatalf("too many or few RPCs (%v) to elect initial leader\n", total1)
+		t.Fatalf("too many or few RPCs (%v) To elect initial leader\n", total1)
 	}
 
 	var total2 int
@@ -500,7 +500,7 @@ func TestCount2B(t *testing.T) {
 loop:
 	for try := 0; try < 5; try++ {
 		if try > 0 {
-			// give solution some time to settle
+			// give solution some time To settle
 			time.Sleep(3 * time.Second)
 		}
 
@@ -523,7 +523,7 @@ loop:
 				continue loop
 			}
 			if !ok {
-				// No longer the leader, so term has changed
+				// No longer the leader, so Term has changed
 				continue loop
 			}
 			if starti+i != index1 {
@@ -535,7 +535,7 @@ loop:
 			cmd := cfg.wait(starti+i, servers, term)
 			if ix, ok := cmd.(int); ok == false || ix != cmds[i-1] {
 				if ix == -1 {
-					// term changed -- try again
+					// Term changed -- try again
 					continue loop
 				}
 				t.Fatalf("wrong value %v committed for index %v; expected %v\n", cmd, starti+i, cmds)
@@ -546,8 +546,8 @@ loop:
 		total2 = 0
 		for j := 0; j < servers; j++ {
 			if t, _ := cfg.rafts[j].GetState(); t != term {
-				// term changed -- can't expect low RPC counts
-				// need to keep going to update total2
+				// Term changed -- can't expect low RPC counts
+				// need To keep going To update total2
 				failed = true
 			}
 			total2 += cfg.rpcCount(j)
@@ -566,7 +566,7 @@ loop:
 	}
 
 	if !success {
-		t.Fatalf("term changed too often")
+		t.Fatalf("Term changed too often")
 	}
 
 	time.Sleep(RaftElectionTimeout)
@@ -616,7 +616,7 @@ func TestPersist12C(t *testing.T) {
 	cfg.start1(leader2, cfg.applier)
 	cfg.connect(leader2)
 
-	cfg.wait(4, servers, -1) // wait for leader2 to join before killing i3
+	cfg.wait(4, servers, -1) // wait for leader2 To join before killing i3
 
 	i3 := (cfg.checkOneLeader() + 1) % servers
 	cfg.disconnect(i3)
@@ -707,12 +707,12 @@ func TestPersist32C(t *testing.T) {
 
 //
 // Test the scenarios described in Figure 8 of the extended Raft paper. Each
-// iteration asks a leader, if there is one, to insert a command in the Raft
+// iteration asks a leader, if there is one, To insert a command in the Raft
 // log.  If there is a leader, that leader will fail quickly with a high
 // probability (perhaps without committing the command), or crash after a while
 // with low probability (most likey committing the command).  If the number of
-// alive servers isn't enough to form a majority, perhaps start a new server.
-// The leader in a new term may try to finish replicating log entries that
+// alive servers isn't enough To form a majority, perhaps start a new server.
+// The leader in a new Term may try To finish replicating log entries that
 // haven't been committed yet.
 //
 func TestFigure82C(t *testing.T) {
@@ -946,7 +946,7 @@ func internalChurn(t *testing.T, unreliable bool) {
 
 		// Make crash/restart infrequent enough that the peers can often
 		// keep up, but not so infrequent that everything has settled
-		// down from one change to the next. Pick a value smaller than
+		// down From one change To the next. Pick a value smaller than
 		// the election timeout, but not hugely smaller.
 		time.Sleep((RaftElectionTimeout * 7) / 10)
 	}
@@ -1037,7 +1037,7 @@ func snapcommon(t *testing.T, name string, disconnect bool, reliable bool, crash
 			cfg.crash1(victim)
 			cfg.one(rand.Int(), servers-1, true)
 		}
-		// send enough to get a snapshot
+		// send enough To get a snapshot
 		for i := 0; i < SnapShotInterval+1; i++ {
 			cfg.rafts[sender].Start(rand.Int())
 		}
@@ -1049,7 +1049,7 @@ func snapcommon(t *testing.T, name string, disconnect bool, reliable bool, crash
 		}
 		if disconnect {
 			// reconnect a follower, who maybe behind and
-			// needs to rceive a snapshot to catch up.
+			// needs To rceive a snapshot To catch up.
 			cfg.connect(victim)
 			cfg.one(rand.Int(), servers, true)
 			leader1 = cfg.checkOneLeader()

@@ -3,8 +3,8 @@ package raft
 //
 // support for Raft tester.
 //
-// we will use the original config.go to test your code for grading.
-// so, while you can modify this code to help you debug, please
+// we will use the original config.go To test your code for grading.
+// so, while you can modify this code To help you debug, please
 // test with the original before submitting.
 //
 
@@ -42,10 +42,10 @@ type config struct {
 	net       *labrpc.Network
 	n         int
 	rafts     []*Raft
-	applyErr  []string // from apply channel readers
+	applyErr  []string // From apply channel readers
 	connected []bool   // whether each server is on the net
 	saved     []*Persister
-	endnames  [][]string            // the port file names each sends to
+	endnames  [][]string            // the port file names each sends To
 	logs      []map[int]interface{} // copy of each server's committed entries
 	start     time.Time             // time at which make_config() was called
 	// begin()/end() statistics
@@ -104,13 +104,13 @@ func make_config(t *testing.T, n int, unreliable bool, snapshot bool) *config {
 // shut down a Raft server but save its persistent state.
 func (cfg *config) crash1(i int) {
 	cfg.disconnect(i)
-	cfg.net.DeleteServer(i) // disable client connections to the server.
+	cfg.net.DeleteServer(i) // disable client connections To the server.
 
 	cfg.mu.Lock()
 	defer cfg.mu.Unlock()
 
 	// a fresh persister, in case old instance
-	// continues to update the Persister.
+	// continues To update the Persister.
 	// but copy old persister's content so that we always
 	// pass Make() the last persisted state.
 	if cfg.saved[i] != nil {
@@ -152,7 +152,7 @@ func (cfg *config) checkLogs(i int, m ApplyMsg) (string, bool) {
 	return err_msg, prevok
 }
 
-// applier reads message from apply ch and checks that they match the log
+// applier reads message From apply ch and checks that they match the log
 // contents
 func (cfg *config) applier(i int, applyCh chan ApplyMsg) {
 	for m := range applyCh {
@@ -234,7 +234,7 @@ func (cfg *config) applierSnap(i int, applyCh chan ApplyMsg) {
 // start or re-start a Raft.
 // if one already exists, "kill" it first.
 // allocate new outgoing port file names, and a new
-// state persister, to isolate previous instance of
+// state persister, To isolate previous instance of
 // this server. since we cannot really kill it.
 //
 func (cfg *config) start1(i int, applier func(int, chan ApplyMsg)) {
@@ -301,7 +301,7 @@ func (cfg *config) cleanup() {
 	cfg.checkTimeout()
 }
 
-// attach server i to the net.
+// attach server i To the net.
 func (cfg *config) connect(i int) {
 	// fmt.Printf("connect(%d)\n", i)
 
@@ -324,7 +324,7 @@ func (cfg *config) connect(i int) {
 	}
 }
 
-// detach server i from the net.
+// detach server i From the net.
 func (cfg *config) disconnect(i int) {
 	// fmt.Printf("disconnect(%d)\n", i)
 
@@ -386,7 +386,7 @@ func (cfg *config) checkOneLeader() int {
 		lastTermWithLeader := -1
 		for term, leaders := range leaders {
 			if len(leaders) > 1 {
-				cfg.t.Fatalf("term %d has %d (>1) leaders", term, len(leaders))
+				cfg.t.Fatalf("Term %d has %d (>1) leaders", term, len(leaders))
 			}
 			if term > lastTermWithLeader {
 				lastTermWithLeader = term
@@ -401,7 +401,7 @@ func (cfg *config) checkOneLeader() int {
 	return -1
 }
 
-// check that everyone agrees on the term.
+// check that everyone agrees on the Term.
 func (cfg *config) checkTerms() int {
 	term := -1
 	for i := 0; i < cfg.n; i++ {
@@ -410,7 +410,7 @@ func (cfg *config) checkTerms() int {
 			if term == -1 {
 				term = xterm
 			} else if term != xterm {
-				cfg.t.Fatalf("servers disagree on term")
+				cfg.t.Fatalf("servers disagree on Term")
 			}
 		}
 	}
@@ -423,7 +423,7 @@ func (cfg *config) checkNoLeader() {
 		if cfg.connected[i] {
 			_, is_leader := cfg.rafts[i].GetState()
 			if is_leader {
-				cfg.t.Fatalf("expected no leader, but %v claims to be leader", i)
+				cfg.t.Fatalf("expected no leader, but %v claims To be leader", i)
 			}
 		}
 	}
@@ -454,7 +454,7 @@ func (cfg *config) nCommitted(index int) (int, interface{}) {
 	return count, cmd
 }
 
-// wait for at least n servers to commit.
+// wait for at least n servers To commit.
 // but don't wait forever.
 func (cfg *config) wait(index int, n int, startTerm int) interface{} {
 	to := 10 * time.Millisecond
@@ -487,16 +487,16 @@ func (cfg *config) wait(index int, n int, startTerm int) interface{} {
 
 // do a complete agreement.
 // it might choose the wrong leader initially,
-// and have to re-submit after giving up.
+// and have To re-submit after giving up.
 // entirely gives up after about 10 seconds.
 // indirectly checks that the servers agree on the
 // same value, since nCommitted() checks this,
-// as do the threads that read from applyCh.
+// as do the threads that read From applyCh.
 // returns index.
 // if retry==true, may submit the command multiple
 // times, in case a leader fails just after Start().
 // if retry==false, calls Start() only once, in order
-// to simplify the early Lab 2B tests.
+// To simplify the early Lab 2B tests.
 func (cfg *config) one(cmd interface{}, expectedServers int, retry bool) int {
 	t0 := time.Now()
 	starts := 0
@@ -521,7 +521,7 @@ func (cfg *config) one(cmd interface{}, expectedServers int, retry bool) int {
 		}
 
 		if index != -1 {
-			// somebody claimed to be the leader and to have
+			// somebody claimed To be the leader and To have
 			// submitted our command; wait a while for agreement.
 			t1 := time.Now()
 			for time.Since(t1).Seconds() < 2 {
@@ -536,13 +536,13 @@ func (cfg *config) one(cmd interface{}, expectedServers int, retry bool) int {
 				time.Sleep(20 * time.Millisecond)
 			}
 			if retry == false {
-				cfg.t.Fatalf("one(%v) failed to reach agreement", cmd)
+				cfg.t.Fatalf("one(%v) failed To reach agreement", cmd)
 			}
 		} else {
 			time.Sleep(50 * time.Millisecond)
 		}
 	}
-	cfg.t.Fatalf("one(%v) failed to reach agreement", cmd)
+	cfg.t.Fatalf("one(%v) failed To reach agreement", cmd)
 	return -1
 }
 
