@@ -60,26 +60,32 @@ func TestReElection2A(t *testing.T) {
 	leader1 := cfg.checkOneLeader()
 
 	// if the leader disconnects, a new one should be elected.
+	fmt.Println("the leader ", leader1, " is disconnected")
 	cfg.disconnect(leader1)
 	cfg.checkOneLeader()
 
 	// if the old leader rejoins, that shouldn't
 	// disturb the new leader.
+	fmt.Println("the old leader ", leader1, " rejoin")
 	cfg.connect(leader1)
 	leader2 := cfg.checkOneLeader()
 
 	// if there's no quorum, no leader should
 	// be elected.
+	fmt.Println("the leader ", leader2, " is disconnected")
 	cfg.disconnect(leader2)
+	fmt.Println("the node ", (leader2+1)%servers, " is disconnected")
 	cfg.disconnect((leader2 + 1) % servers)
 	time.Sleep(2 * RaftElectionTimeout)
 	cfg.checkNoLeader()
 
 	// if a quorum arises, it should elect a leader.
+	fmt.Println("the node ", (leader2+1)%servers, " is connected")
 	cfg.connect((leader2 + 1) % servers)
 	cfg.checkOneLeader()
 
 	// re-join of last node shouldn't prevent leader From existing.
+	fmt.Println("the leader ", leader2, " rejoin")
 	cfg.connect(leader2)
 	cfg.checkOneLeader()
 
@@ -142,10 +148,8 @@ func TestBasicAgree2B(t *testing.T) {
 	cfg.end()
 }
 
-//
 // check, based on counting bytes of RPCs, that
 // each command is sent To each peer just once.
-//
 func TestRPCBytes2B(t *testing.T) {
 	servers := 3
 	cfg := make_config(t, servers, false, false)
@@ -705,7 +709,6 @@ func TestPersist32C(t *testing.T) {
 	cfg.end()
 }
 
-//
 // Test the scenarios described in Figure 8 of the extended Raft paper. Each
 // iteration asks a leader, if there is one, To insert a command in the Raft
 // log.  If there is a leader, that leader will fail quickly with a high
@@ -714,7 +717,6 @@ func TestPersist32C(t *testing.T) {
 // alive servers isn't enough To form a majority, perhaps start a new server.
 // The leader in a new Term may try To finish replicating log entries that
 // haven't been committed yet.
-//
 func TestFigure82C(t *testing.T) {
 	servers := 5
 	cfg := make_config(t, servers, false, false)

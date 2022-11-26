@@ -120,6 +120,7 @@ func (cfg *config) crash1(i int) {
 	rf := cfg.rafts[i]
 	if rf != nil {
 		cfg.mu.Unlock()
+		fmt.Println("crash1...")
 		rf.Kill()
 		cfg.mu.Lock()
 		cfg.rafts[i] = nil
@@ -230,13 +231,11 @@ func (cfg *config) applierSnap(i int, applyCh chan ApplyMsg) {
 	}
 }
 
-//
 // start or re-start a Raft.
 // if one already exists, "kill" it first.
 // allocate new outgoing port file names, and a new
 // state persister, To isolate previous instance of
 // this server. since we cannot really kill it.
-//
 func (cfg *config) start1(i int, applier func(int, chan ApplyMsg)) {
 	cfg.crash1(i)
 
@@ -294,6 +293,7 @@ func (cfg *config) checkTimeout() {
 func (cfg *config) cleanup() {
 	for i := 0; i < len(cfg.rafts); i++ {
 		if cfg.rafts[i] != nil {
+			fmt.Println("cleanup kill")
 			cfg.rafts[i].Kill()
 		}
 	}
@@ -371,6 +371,8 @@ func (cfg *config) setlongreordering(longrel bool) {
 // try a few times in case re-elections are needed.
 func (cfg *config) checkOneLeader() int {
 	for iters := 0; iters < 10; iters++ {
+		fmt.Println("checkOneLeader iter:", iters, " time:", time.Now())
+
 		ms := 450 + (rand.Int63() % 100)
 		time.Sleep(time.Duration(ms) * time.Millisecond)
 
